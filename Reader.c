@@ -46,7 +46,7 @@
 ***********************************************************
 * File name: Reader.c
 * Compiler: MS Visual Studio 2022
-* Course: CST 8152 – Compilers, Lab Section: [011, 012, 013]
+* Course: CST 8152 ñ Compilers, Lab Section: [011, 012, 013]
 * Assignment: A12.
 * Date: May 01 2023
 * Professor: Paulo Sousa
@@ -70,27 +70,27 @@
 #include "Reader.h"
 #endif
 
-/*
-***********************************************************
-* Function name: readerCreate
-* Purpose: Creates the buffer reader according to capacity, increment
-	factor and operational mode ('f', 'a', 'm')
-* Author: Svillen Ranev / Paulo Sousa
-* History/Versions: S22
-* Called functions: calloc(), malloc()
-* Parameters:
-*   size = initial capacity
-*   increment = increment factor
-*   mode = operational mode
-* Return value: bPointer (pointer to reader)
-* Algorithm: Allocation of memory according to inicial (default) values.
-* TODO ......................................................
-*	- Adjust datatypes for your LANGUAGE.
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Check flags.
-*************************************************************
-*/
+ /*
+ ***********************************************************
+ * Function name: readerCreate
+ * Purpose: Creates the buffer reader according to capacity, increment
+	 factor and operational mode ('f', 'a', 'm')
+ * Author: Svillen Ranev / Paulo Sousa
+ * History/Versions: S22
+ * Called functions: calloc(), malloc()
+ * Parameters:
+ *   size = initial capacity
+ *   increment = increment factor
+ *   mode = operational mode
+ * Return value: bPointer (pointer to reader)
+ * Algorithm: Allocation of memory according to inicial (default) values.
+ * TODO ......................................................
+ *	- Adjust datatypes for your LANGUAGE.
+ *   - Use defensive programming
+ *	- Check boundary conditions
+ *	- Check flags.
+ *************************************************************
+ */
 
 ReaderPointer readerCreate(i32 size, i32 increment, i32 mode) {
 	ReaderPointer readerPointer;
@@ -102,6 +102,7 @@ ReaderPointer readerCreate(i32 size, i32 increment, i32 mode) {
 		increment = READER_DEFAULT_INCREMENT;
 	}
 	if (increment <= 0) {
+		increment = READER_DEFAULT_INCREMENT;
 		mode = MODE_FIXED;
 	}
 	if (mode != MODE_FIXED && mode != MODE_ADDIT && mode != MODE_MULTI) {
@@ -128,7 +129,6 @@ ReaderPointer readerCreate(i32 size, i32 increment, i32 mode) {
 
 	/*  Initialize flags */
 	readerPointer->flags = READER_DEFAULT_FLAG;
-	readerPointer->flags |= READER_EMP_FLAG;
 
 	/*  The created flag must be signalized as EMP */
 	readerPointer->flags = READER_EMP_FLAG;
@@ -161,12 +161,13 @@ ReaderPointer readerAddChar(ReaderPointer const readerPointer, pp_char ch) {
 		return NULL;
 	}
 	/* TO_DO: Reset Realocation */
-	readerPointer->flags &= ~READER_RSTFUL_FLAG;
+	readerPointer->flags &= ~READER_REL_FLAG;
 
 	/* TO_DO: Test the inclusion of chars */
 	if (readerPointer->offset.wrte * (i32)sizeof(pp_char) < readerPointer->size) {
 		/* TO_DO: This buffer is NOT full */
-	} else {
+	}
+	else {
 		/* TO_DO: Reset Full flag */
 		readerPointer->flags &= ~READER_FUL_FLAG;
 
@@ -239,6 +240,7 @@ pp_boln readerClear(ReaderPointer const readerPointer) {
 	/* Reset offsets */
 	readerPointer->offset.read = 0;
 	readerPointer->offset.wrte = 0;
+	readerPointer->offset.mark = 0;
 
 	/* TO_DO: Adjust flags original */
 	readerPointer->flags = READER_DEFAULT_FLAG;
@@ -290,11 +292,8 @@ pp_boln readerIsFull(ReaderPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	if (readerPointer == NULL)
 		return FALSE;
-	/* TO_DO: Check flag if buffer is FUL */
-	if ((readerPointer->flags & READER_CHKFUL_FLAG) == READER_FUL_FLAG)
-		return TRUE;
-	else
-		return FALSE;
+	/* TO_DO: Check flag if buffer is FUL */	
+		return ((readerPointer->flags & READER_CHKFUL_FLAG) != 0);
 }
 
 
@@ -317,10 +316,8 @@ pp_boln readerIsEmpty(ReaderPointer const readerPointer) {
 	if (readerPointer == NULL)
 		return TRUE;
 	/* TO_DO: Check flag if buffer is EMP */
-	if ((readerPointer->flags & READER_CHKFUL_FLAG) && (readerPointer->flags & READER_EMP_FLAG))
-		return TRUE;
-	else
-		return FALSE;
+
+		return((readerPointer->flags & READER_DEFAULT_FLAG) != 0);
 }
 
 /*
@@ -340,13 +337,11 @@ pp_boln readerIsEmpty(ReaderPointer const readerPointer) {
 */
 pp_boln readerSetMark(ReaderPointer const readerPointer, i32 mark) {
 	/* TO_DO: Defensive programming */
-	if (readerPointer == NULL)
+	if (readerPointer == NULL || mark < 0 || mark > readerPointer->offset.wrte) {
 		return FALSE;
+	}
 
 	/* TO_DO: Adjust mark */
-	if (mark < 0 || mark > readerPointer->offset.wrte)
-		return FALSE;
-
 	readerPointer->offset.mark = mark;
 
 	return TRUE;
@@ -407,19 +402,33 @@ i32 readerLoad(ReaderPointer const readerPointer, FILE* const fileDescriptor) {
 		return READER_ERROR;
 
 	c = (pp_char)fgetc(fileDescriptor);
+
 	while (!feof(fileDescriptor)) {
 		if (!readerAddChar(readerPointer, c)) {
 			ungetc(c, fileDescriptor);
+			fclose(fileDescriptor);
 			return READER_ERROR;
 		}
-		if (readerIsFull(readerPointer)) {
-			ungetc(c, fileDescriptor);
-			return READER_ERROR;
-		}
-		c = (char)fgetc(fileDescriptor);
+		c = (pp_char)fgetc(fileDescriptor);
 		size++;
+
+		/* TO_DO: Check buffer size limit */
+		if (size >= readerPointer->size) {
+			// Perform buffer reallocation to accommodate more content
+			readerPointer->size += readerPointer->increment;
+
+			pp_char* temp = realloc(readerPointer->content, readerPointer->size * sizeof(pp_char));
+			if (temp == NULL) {
+				fclose(fileDescriptor);  // Close the file descriptor before returning an error
+				return READER_ERROR;
+			}
+			else {
+				readerPointer->content = temp;
+			}
+		}
 	}
-	/* TO_DO: Defensive programming */
+
+	fclose(fileDescriptor);  // Close the file descriptor after reading the entire file
 	return size;
 }
 
@@ -440,20 +449,10 @@ i32 readerLoad(ReaderPointer const readerPointer, FILE* const fileDescriptor) {
 */
 pp_boln readerRecover(ReaderPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
-	if (readerPointer == NULL)
+	if (readerPointer == NULL) {
 		return FALSE;
-
-	// Check if mark offset is out of bounds
-	if (readerPointer->offset.mark < 0 || readerPointer->offset.mark > readerPointer->offset.wrte)
-		return FALSE;
-	// Reset offsets and flags
+	}
 	readerPointer->offset.read = 0;
-	readerPointer->offset.wrte = 0;
-	readerPointer->flags = READER_DEFAULT_FLAG;
-
-	/* TO_DO: Recover positions */
-	readerPointer->content += readerPointer->offset.mark;
-	readerPointer->offset.wrte -= readerPointer->offset.mark;
 	readerPointer->offset.mark = 0;
 
 	return TRUE;
@@ -479,11 +478,9 @@ pp_boln readerRetract(ReaderPointer const readerPointer) {
 	if (readerPointer == NULL) {
 		return FALSE;
 	}
-	if (readerPointer->offset.read <= 0) {
-		return FALSE;
+	if (readerPointer->offset.read > 0) {
+		readerPointer->offset.read--;
 	}
-	/* TO_DO: Retract (return 1 pos read) */
-	readerPointer->offset.read--;
 
 	return TRUE;
 }
@@ -507,10 +504,8 @@ pp_boln readerRestore(ReaderPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	if (readerPointer == NULL) {
 		return FALSE;
-	}/* Check if mark offset is within valid range */
-	if (readerPointer->offset.mark < 0 || readerPointer->offset.mark > readerPointer->offset.wrte) {
-		return FALSE;
 	}
+
 	/* TO_DO: Restore positions (read/mark) */
 	readerPointer->offset.read = readerPointer->offset.mark;
 
@@ -537,18 +532,15 @@ pp_char readerGetChar(ReaderPointer const readerPointer) {
 	if (readerPointer == NULL) {
 		return CHARSEOF;
 	}
-	/* Increment readPos offset */
-	readerPointer->offset.read++;
-
 	/* TO_DO: Check condition to read/wrte */
 	if (readerPointer->offset.read == readerPointer->offset.wrte) {
-		/* Set END flag */
-		readerPointer->flags |= READER_END_FLAG;
+		readerPointer->flags |= READER_TERMINATOR;
+
 		return CHARSEOF;
 	}
 
 	/* TO_DO: Reset EOB flag */
-	readerPointer->flags &= ~READER_END_FLAG;
+	readerPointer->flags &= ~READER_TERMINATOR;
 
 	return readerPointer->content[readerPointer->offset.read++];
 }
@@ -787,6 +779,7 @@ pp_void readerPrintStat(ReaderPointer const readerPointer) {
 		printf("Char '%c': Count %d\n", i, readerPointer->histogram[i]);
 	}
 
+	printf("Content: %s\n", readerPointer->content);
 }
 
 /*

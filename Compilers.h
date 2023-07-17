@@ -47,7 +47,7 @@
 ************************************************************
 * File name: Compilers.h
 * Compiler: MS Visual Studio 2022
-* Course: CST 8152 – Compilers, Lab Section: [011, 012]
+* Course: CST 8152 ñ Compilers, Lab Section: [011, 012]
 * Assignment: A12, A22, A32.
 * Date: May 01 2023
 * Professor: Paulo Sousa
@@ -70,9 +70,9 @@
  * ............................................................................
  */
 
-/* TO_DO: Adjust your language (cannot be "Mold") */
+ /* TO_DO: Adjust your language (cannot be "Mold") */
 
-/* Language name */
+ /* Language name */
 #define STR_LANGNAME	"PePe"
 
 /* Logical constants - adapt for your language */
@@ -83,13 +83,13 @@
 ------------------------------------------------------------
 Data types definitions
 NOTE: Some types may not be directly used by your language,
-		but they can be necessary for conversions.
+        but they can be necessary for conversions.
 ------------------------------------------------------------
 */
 
 /* TO_DO: Define your typedefs */
 typedef char			pp_char;
-typedef char*			String;
+typedef char* String;
 typedef int				i32;
 typedef float			f32;
 typedef void			pp_void;
@@ -109,9 +109,9 @@ Programs:
 ------------------------------------------------------------
 */
 enum PROGRAMS {
-	PGM_READER	= 'R',
-	PGM_SCANNER = 'S',
-	PGM_PARSER	= 'P'
+    PGM_READER = 'R',
+    PGM_SCANNER = 'S',
+    PGM_PARSER = 'P'
 };
 
 /*

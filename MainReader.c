@@ -46,7 +46,7 @@
 ************************************************************
 * File name: MainReader.c
 * Compiler: MS Visual Studio 2022
-* Course: CST 8152 – Compilers, Lab Section: [011, 012]
+* Course: CST 8152 ñ Compilers, Lab Section: [011, 012]
 * Assignment: A12, A22, A32.
 * Date: May 01 2023
 * Professor: Paulo Sousa
@@ -97,11 +97,11 @@
  * (see "Compilers.h")
  */
 
-/*
- * -------------------------------------------------------------
- *  Function declarations
- * -------------------------------------------------------------
- */
+ /*
+  * -------------------------------------------------------------
+  *  Function declarations
+  * -------------------------------------------------------------
+  */
 pp_void bErrorPrint(String fmt, ...);
 pp_void displayBuffer(BufferReader* ptr_Buffer);
 i64 getFileSize(String fname);
