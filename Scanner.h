@@ -2,7 +2,7 @@
 ************************************************************
 * COMPILERS COURSE - Algonquin College
 * Code version: Summer, 2023
-* Author: TO_DO
+* Author: Jose Vinueza
 * Professors: Paulo Sousa
 ************************************************************
  ____  _____   ____  _____
@@ -100,7 +100,7 @@ enum TOKENS {
 	LogOpT,    // 15: Logical Operator token
 	AssOpT,
 	IncOpT,
-	VarT
+	VarT,
 };
 
 static String tokenStrTable[NUM_TOKENS] = {
@@ -202,24 +202,24 @@ typedef struct scannerData {
 
 /* TO_DO: Transition table - type of states defined in separate table */
 static i32 transitionTable[NUM_STATES][CHAR_CLASSES] = {
-	/*    [A-z],[0-9],    _,    (,   "',   *,   /, SEOF, other
-		   L(0), D(1), U(2), M(3), Q(4), S(5), C(6),  E(7), O(8) */
-		{     1,    4, ESNR, ESNR,    6, ESNR,   8, ESNR, ESNR},	// S0: NOAS
-		{     1,    1,    1,    2,    3,    3,   3,  ESNR,    3},	// S1: NOAS
-		{    FS,   FS,   FS,   FS,   FS,   FS,  FS,   FS,   FS},	// S2: ASNR (Method)
-		{    FS,   FS,   FS,   FS,   FS,   FS,  FS,   FS,   FS},	// S3: ASWR (Keyword/Variable)
-		{     5,    4,    5,    5,    5,    5,   5,  ESNR,    5},	// S4: NOAS
-		{    FS,   FS,   FS,   FS,   FS,   FS,  FS,   FS,   FS},	// S5: ASWR (Digit)
-		{     6,    6,    6,    6,    7,    6,   6,    7,    6},	// S6: NOAS
-		{    FS,   FS,   FS,   FS,   FS,   FS,  FS,   FS,   FS},	// S7: ASNR (String)
-		{   ESNR, ESNR, ESNR, ESNR, ESNR,    9, ESNR, ESNR, ESNR},	// S8: NOAS
-		{    10,   10,   10,   10,   10,   10,  10,  ESNR,   10},	// S9: NOAS
-		{    11,   11,   11,   11,   11,   11,  12,   FS,   11},	// S10: NOAS
-		{    FS,   FS,   FS,   FS,   FS,   FS,  FS,   FS,   FS},	// S11: ASNR (Comment)
-		{    FS,   FS,   FS,   FS,   FS,   FS,  FS,   FS,   FS} ,	// S12: ASNR (ES)
-		{    FS,   FS,   FS,   FS,   FS,   FS,  FS,   FS,   FS}	,	// S13: ASWR (ER)
-
+	/*    [A-z],[0-9], _, (,  ", *, /, SEOF, other
+		  L(0), D(1), U(2), M(3), Q(4), S(5), C(6),  E(7), O(8) */
+		{     1,    4, ESNR, ESNR,    6, ESNR,   8, ESNR, ESNR},  // S0: NOAS
+		{     1,    1,    1,    2,    3,    3,   3,  ESNR,    3},  // S1: NOAS
+		{    FS,   FS,   FS,   FS,   FS,   FS,  FS,   FS,   FS},  // S2: ASNR (Method)
+		{    FS,   FS,   FS,   FS,   FS,   FS,  FS,   FS,   FS},  // S3: ASWR (Keyword/Variable)
+		{     5,    4,    5,    5,    5,    5,   5,  ESNR,    5},  // S4: NOAS
+		{    FS,   FS,   FS,   FS,   FS,   FS,  FS,   FS,   FS},  // S5: ASWR (Digit) - Accepting state with retraction for numbers
+		{     6,    6,    6,    6,    7,    6,   6,    7,    6},  // S6: NOAS
+		{    FS,   FS,   FS,   FS,   FS,   FS,  FS,   FS,   FS},  // S7: ASNR (String)
+		{   ESNR, ESNR, ESNR, ESNR, ESNR,    9, ESNR, ESNR, ESNR},  // S8: NOAS
+		{    10,   10,   10,   10,   10,   10,  10,  ESNR,   10},  // S9: NOAS
+		{    11,   11,   11,   11,   11,   11,  12,   FS,   11},  // S10: NOAS
+		{    FS,   FS,   FS,   FS,   FS,   FS,  FS,   FS,   FS},  // S11: ASNR (Comment)
+		{    FS,   FS,   FS,   FS,   FS,   FS,  FS,   FS,   FS},  // S12: ASNR (ES)
+		{    FS,   FS,   FS,   FS,   FS,   FS,  FS,   FS,   FS}   // S13: ASWR (ER)
 };
+
 
 
 /* Define accepting states types */
@@ -293,7 +293,7 @@ static PTR_ACCFUN finalStateTable[NUM_STATES] = {
 	NULL,	    /*      [08] */
 	NULL,		/*      [09] */
 	NULL,		/*      [10] */
-	funcSL,		/* SL   [11] */
+	funcCMT,		/* SL   [11] */
 	funcErr,	/* ERR1 [12] */
 	funcErr,	/* ERR2 [13] */
 };
@@ -304,7 +304,7 @@ Language keywords
 -------------------------------------------------
 */
 /* TO_DO: Define the number of Keywords from the language */
-#define KWT_SIZE 17
+#define KWT_SIZE 12
 
 static String keywordTable[KWT_SIZE] = {
 	"let",		/* KW00 */
@@ -315,15 +315,10 @@ static String keywordTable[KWT_SIZE] = {
 	"while",	/* KW05 */
 	"match",	/* KW06 */
 	"struct",	/* KW07 */
-	"impl",		/* KW08 */
-	"enum",		/* KW09 */
-	"use",		/* KW10 */
-	"pub",		/* KW11 */
-	"mut",		/* KW12 */
-	"return",	/* KW13 */
-	"trait",	/* KW14 */
-	"i32",
-	"print!"
+	"enum",		/* KW08 */
+	"return",	/* KW09 */
+	"String",	/* KW10 */
+	"i32"		/* KW11 */
 };
 
 /* NEW SECTION: About indentation */

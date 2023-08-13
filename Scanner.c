@@ -2,10 +2,10 @@
 ************************************************************
 * COMPILERS COURSE - Algonquin College
 * Code version: Summer, 2023
-* Author: TO_DO
+* Author: Jose Vinueza
 * Professors: Paulo Sousa
 ************************************************************
- ____  _____   ____  _____
+ ____  _____   ____  _____ 
 |  _ \| ____| |  _ \| ____|
 | |_) |  _|   | |_) |  _|
 |  __/| |___  |  __/| |___
@@ -146,7 +146,7 @@ Token tokenizer(pp_void) {
     i32 lexLength;     /* token length */
     i32 i;             /* counter */
 
-    pp_char newc;      // new char
+    //pp_char newc;      // new char
 
     while (1) { /* endless loop broken by token returns it will generate a warning */
         c = readerGetChar(sourceBuffer);
@@ -334,24 +334,6 @@ i32 nextState(i32 state, pp_char c) {
 }
 
 /*
-i32 nextState(i32 state, pp_char c) {
-	i32 col;
-	i32 next;
-	col = nextClass(c);
-	next = transitionTable[state][col];
-	printf("Current state: %d, Input symbol: %c, Next state: %d \n", state, c, next);
-	assert(next != FS);
-	if (next == FS) {
-		printf("Scanner Error: Illegal state:\n");
-		printf("Input symbol: %c Row: %d Column: %d\n", c, state, col);
-		exit(1);
-	}
-	return next;
-}
-*/
-
-
-/*
  ************************************************************
  * Get Next Token Class
 	* Create a function to return the column number in the transition table:
@@ -533,7 +515,6 @@ Token funcSL(String lexeme) {
  * - Tip: Remember to use the keywordTable to check the keywords.
  ***********************************************************
  */
- /* TO_DO: Adjust the function for Keywords */
 
 Token funcKEY(String lexeme) {
 	Token currentToken = { 0 };
@@ -610,28 +591,32 @@ pp_void printToken(Token t) {
 		scData.scanHistogram[SeofT]++;
 		break;
 	case MthdT:
-		printf("MTHD\t\t%s\n", t.attribute.idLexeme);
+		printf("MthdT\t\t%s\n", t.attribute.idLexeme);
 		scData.scanHistogram[MthdT]++;
 		break;
+	case InlT:
+		printf("InlT\t\t%d\n", t.attribute.intValue);
+		scData.scanHistogram[InlT]++;
+		break;
 	case StrT:
-		printf("STR_T\t\t%d\t ", (i32)t.attribute.codeType);
+		printf("StrT\t\t%d\t ", (i32)t.attribute.codeType);
 		printf("%s\n", readerGetContent(stringLiteralTable, (i32)t.attribute.codeType));
 		scData.scanHistogram[StrT]++;
 		break;
 	case LprT:
-		printf("LPR_T\n");
+		printf("LprT\n");
 		scData.scanHistogram[LprT]++;
 		break;
 	case RprT:
-		printf("RPR_T\n");
+		printf("RprT\n");
 		scData.scanHistogram[RprT]++;
 		break;
 	case LbrT:
-		printf("LBR_T\n");
+		printf("LbrT\n");
 		scData.scanHistogram[LbrT]++;
 		break;
 	case RbrT:
-		printf("RBR_T\n");
+		printf("RbrT\n");
 		scData.scanHistogram[RbrT]++;
 		break;
 	case KeyT:
@@ -663,17 +648,17 @@ pp_void printToken(Token t) {
 		break;
 	case RelOpT:
 		if (t.attribute.relationalOperator == Eq) {
-			printf("EqT\n");
+			printf("Eq\n");
 
 		}
 		if (t.attribute.relationalOperator == Ne) {
-			printf("NeT\n");
+			printf("Ne\n");
 		}
 		if (t.attribute.relationalOperator == Gt) {
-			printf("GeT\n");
+			printf("Ge\n");
 		}
 		if (t.attribute.relationalOperator == Lt) {
-			printf("LtT\n");
+			printf("Lt\n");
 		}
 		scData.scanHistogram[RelOpT]++;
 
@@ -695,6 +680,7 @@ pp_void printToken(Token t) {
 		printf("EOS_T\n");
 		scData.scanHistogram[EosT]++;
 		break;
+
 	default:
 		printf("Scanner error: invalid token code: %d\n", t.code);
 	}

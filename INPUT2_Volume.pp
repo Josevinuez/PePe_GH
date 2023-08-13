@@ -1,9 +1,7 @@
 // PePe Example 2: Volume of a sphere
 
 fn main() {
-    let mut pi: f64;
-    let mut r: f64;
-    let mut vol: f64;
+
     
     pi = 3.14;
     

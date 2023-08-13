@@ -70,7 +70,8 @@
  * ............................................................................
  */
 
- /* TO_DO: Adjust your language (cannot be "Mold") */
+ /* TO_DO: Adjust your language (cannot be "
+ ") */
 
  /* Language name */
 #define STR_LANGNAME	"PePe"
@@ -89,7 +90,7 @@ NOTE: Some types may not be directly used by your language,
 
 /* TO_DO: Define your typedefs */
 typedef char			pp_char;
-typedef char* String;
+typedef char*           String;
 typedef int				i32;
 typedef float			f32;
 typedef void			pp_void;
@@ -121,10 +122,9 @@ Main functions signatures
 ------------------------------------------------------------
 */
 i32 mainReader(i32 argc, String* argv);
-/* TO_DO: Remove comment for next assignmens: Scanner: A22 and Parser: A32
-mold_intg mainScanner(mold_intg argc, mold_string* argv);
-mold_intg mainParser(mold_intg argc, mold_string* argv);
-*/
+i32 mainScanner(i32 argc, String* argv);
+i32 mainParser(i32 argc, String* argv);
+
 pp_void printLogo();
 
 #endif

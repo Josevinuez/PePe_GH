@@ -61,6 +61,7 @@
  * - Review the functions to use "Defensive Programming".
  *.............................................................................
  */
+#include <string.h> 
 
 #ifndef COMPILERS_H_
 #include "Compilers.h"
@@ -366,7 +367,6 @@ i32 readerPrint(ReaderPointer const readerPointer) {
 	i32 cont = 0;
 	pp_char c;
 	/* TO_DO: Defensive programming (including invalid chars) */
-	c = readerGetChar(readerPointer);
 	/* TO_DO: Check flag if buffer EOB has achieved */
 	while (cont < readerPointer->offset.wrte) {
 		c = readerGetChar(readerPointer);
